@@ -1,278 +1,132 @@
-Q1
-# nb_gender.py
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.naive_bayes import GaussianNB, BernoulliNB
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score
-
-df = pd.read_csv('gender_dataset.csv')  # replace path
-
-# Example label encoding
-df['gender_label'] = df['gender'].map({'Male':0,'Female':1})
-
-X = df[['long_hair','forehead_width_cm','forehead_height_cm',
-        'nose_wide','nose_long','lips_thin','distance_nose_to_lip_long']]
-y = df['gender_label']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-# Choose NB type; gaussian handles continuous forehead measures
-clf = GaussianNB()
-clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print(confusion_matrix(y_test, y_pred))
-print(classification_report(y_test, y_pred))
-
-Q2
-# svm_fraud.py
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-from sklearn.metrics import classification_report, roc_auc_score, confusion_matrix
-
-df = pd.read_csv('creditcard.csv')  # path
-X = df.drop('Class', axis=1)  # assume 'Class' is label
-y = df['Class']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=42)
-
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
-
-clf = SVC(kernel='rbf', class_weight='balanced', probability=True)
-clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-y_proba = clf.predict_proba(X_test)[:,1]
-
-print(classification_report(y_test, y_pred))
-print("ROC AUC:", roc_auc_score(y_test, y_proba))
-print(confusion_matrix(y_test, y_pred))
-
-Q3
-# logistic_heart.py
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import classification_report, roc_auc_score
-
-df = pd.read_csv('heart.csv')  # adapt filename & label column
-X = df.drop('target', axis=1)  # assume 'target' 1= disease
-y = df['target']
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, stratify=y, test_size=0.2, random_state=42)
-sc = StandardScaler()
-X_train = sc.fit_transform(X_train)
-X_test = sc.transform(X_test)
-
-clf = LogisticRegression(max_iter=1000)
-clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-y_proba = clf.predict_proba(X_test)[:,1]
-
-print(classification_report(y_test, y_pred))
-print("ROC AUC", roc_auc_score(y_test, y_proba))
+exp 4 
+Churn prediction 
+Aim: To build a logistic regression model that predicts the probability of customer churn 
+(whether a customer cancels their subscription) using demographic and behavioral features. 
+Additionally, the model will help identify which features have the strongest influence on churn 
+likelihood. 
+Dataset Description: The dataset contains information about customers of a subscription 
+service, including their demographic details, usage behavior, payment history, and churn status. 
+Each record represents one customer with features such as Age, Tenure, Usage Frequency, 
+Payment Delay, Total Spend, and Last Interaction, along with the target variable Churn, 
+indicating whether the customer has cancelled their subscription (1) or not (0). 
+Procedure 
+● Import necessary libraries such as pandas, scikit-learn, seaborn, and matplotlib. 
+● Load and inspect the dataset using pandas to understand its structure. 
+● Select the relevant numerical features and define the target variable (Churn). 
+● Standardize the numerical features using StandardScaler to bring all variables to a 
+similar scale. 
+● Split the dataset into training (80%) and testing (20%) sets using train_test_split. 
+● Initialize and train a LogisticRegression model on the training data. 
+● Evaluate the model on the test data using accuracy_score. 
+● Analyze the logistic regression coefficients to identify features that most influence churn 
+probability. 
+Program: 
 
 
-Q4
-# linear_medical_cost.py
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.compose import ColumnTransformer
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
 
-df = pd.read_csv('medical_costs.csv')  # contains age, sex, bmi, children, smoker, region, charges
-
-X = df.drop('charges', axis=1)
-y = df['charges']
-
-# categorical columns
-cat_cols = ['sex','smoker','region']
-num_cols = ['age','bmi','children']
-
-preprocessor = ColumnTransformer([
-    ('num', StandardScaler(), num_cols),
-    ('cat', OneHotEncoder(drop='first'), cat_cols)
-])
-
-X_proc = preprocessor.fit_transform(X)
-X_train, X_test, y_train, y_test = train_test_split(X_proc, y, test_size=0.2, random_state=42)
-
-model = LinearRegression()
-model.fit(X_train, y_train)
-y_pred = model.predict(X_test)
-
-print("RMSE:", mean_squared_error(y_test, y_pred, squared=False))
-print("R2:", r2_score(y_test, y_pred))
-
-
-Q5
-# numpy_ops_runtime.py
-import numpy as np
-
-def read_matrix(prompt):
-    print(prompt)
-    rows = int(input("Number of rows: "))
-    cols = int(input("Number of cols: "))
-    print("Enter rows, space separated values:")
-    mat = []
-    for r in range(rows):
-        row = list(map(float, input().strip().split()))
-        if len(row) != cols:
-            raise ValueError("Wrong number of columns")
-        mat.append(row)
-    return np.array(mat)
-
-A = read_matrix("Matrix A")
-B = read_matrix("Matrix B")
-
-C = A.dot(B)
-D = A + B  # shapes must match
-
-print("C =\n", C)
-print("D =\n", D)
-
-from numpy.linalg import det
-print("det(C) =", det(C))
-print("det(D) =", det(D))
-
-print("C.T =\n", C.T)
-print("D.T =\n", D.T)
-
-Q6
-# numpy_eig_diag.py
-import numpy as np
-
-A = np.array([[2,1],[1,2]])  # or read runtime as above
-B = np.array([[3,0],[0,1]])
-
-C = A.dot(B)
-print("C:\n", C)
-
-# eigen decomposition
-eigvals_A, eigvecs_A = np.linalg.eig(A)
-eigvals_B, eigvecs_B = np.linalg.eig(B)
-
-print("eigvals A:", eigvals_A)
-print("eigvecs A:\n", eigvecs_A)
-
-# addition between eigenvectors (flatten or column-wise)
-# Example: sum of first eigenvectors (ensure same shapes)
-sum_ev = eigvecs_A + eigvecs_B
-print("sum of eigenvector matrices:\n", sum_ev)
-
-# diagonal matrix of C (diagonal entries of C)
-diagC = np.diag(np.diag(C))
-print("Diagonal matrix of C:\n", diagC)
-
-Q7
-# grid_heart.py
-import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression
-from sklearn.pipeline import Pipeline
-from sklearn.metrics import classification_report, roc_auc_score
-
-df = pd.read_csv('heart.csv')
-X = df.drop('target', axis=1); y = df['target']
-X_train, X_test, y_train, y_test = train_test_split(X,y,stratify=y,test_size=0.2,random_state=42)
-
-# SVM pipeline + Grid
-pipe_svm = Pipeline([('scaler', StandardScaler()), ('clf', SVC(probability=True))])
-param_grid_svm = {
-  'clf__kernel': ['rbf','linear'],
-  'clf__C': [0.1,1,10],
-  'clf__gamma': ['scale','auto']
-}
-gs_svm = GridSearchCV(pipe_svm, param_grid_svm, cv=5, scoring='roc_auc', n_jobs=-1)
-gs_svm.fit(X_train, y_train)
-print("Best SVM:", gs_svm.best_params_, "score:", gs_svm.best_score_)
-
-# Logistic pipeline + Grid
-pipe_lr = Pipeline([('scaler', StandardScaler()), ('clf', LogisticRegression(max_iter=2000))])
-param_grid_lr = {
-  'clf__C': [0.01,0.1,1,10],
-  'clf__penalty': ['l2']
-}
-gs_lr = GridSearchCV(pipe_lr, param_grid_lr, cv=5, scoring='roc_auc', n_jobs=-1)
-gs_lr.fit(X_train, y_train)
-print("Best LR:", gs_lr.best_params_, "score:", gs_lr.best_score_)
-
-# Evaluate best models on test
-for name, model in [('SVM', gs_svm.best_estimator_), ('LR', gs_lr.best_estimator_)]:
-    y_pred = model.predict(X_test)
-    y_proba = model.predict_proba(X_test)[:,1]
-    print("===", name, "===")
-    print(classification_report(y_test, y_pred))
-    print("ROC AUC:", roc_auc_score(y_test, y_proba))
-
-Q8
-# graph_centrality.py
-import pandas as pd
-import networkx as nx
-import matplotlib.pyplot as plt
-
-df = pd.read_csv('my_graph1.tsv', sep='\t', header=None, names=['u','v'])
-G = nx.from_pandas_edgelist(df, 'u', 'v')
-
-deg = nx.degree_centrality(G)
-bet = nx.betweenness_centrality(G)
-clo = nx.closeness_centrality(G)
-
-print("Degree centrality:", deg)
-print("Betweenness centrality:", bet)
-print("Closeness centrality:", clo)
-
-# shortest path between every pair
-sp = dict(nx.all_pairs_shortest_path_length(G))
-# print nicely
-for u, d in sp.items():
-    print(u, "->", d)
-
-# draw
-pos = nx.spring_layout(G)
-plt.figure(figsize=(8,6))
-nx.draw(G, pos, with_labels=True, node_size=500)
-plt.title("Graph (spring layout)")
-plt.show()
-
-Q9
-# pca_svm_graph2.py
-import pandas as pd
-from sklearn.decomposition import PCA
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-from sklearn.model_selection import train_test_split
-from sklearn.metrics import classification_report
-
-df = pd.read_csv('my_graph2.tsv', sep='\t')
-# assume last column is label
-X = df.drop('label', axis=1)
-y = df['label']
-
-print("Correlation matrix:\n", X.corr())
-
-sc = StandardScaler()
-Xs = sc.fit_transform(X)
-
-pca = PCA(n_components=0.90)  # keep 90% variance
-Xp = pca.fit_transform(Xs)
-print("Explained variance ratio:", pca.explained_variance_ratio_.sum(), "n_components:", pca.n_components_)
-
-X_train, X_test, y_train, y_test = train_test_split(Xp, y, test_size=0.2, stratify=y, random_state=42)
-clf = SVC(kernel='rbf', probability=True)
-clf.fit(X_train, y_train)
-y_pred = clf.predict(X_test)
-print(classification_report(y_test, y_pred))
-
-Q10
+import pandas as pd 
+from sklearn.linear_model import LogisticRegression 
+from sklearn.model_selection import train_test_split 
+from sklearn.preprocessing import StandardScaler 
+from sklearn.metrics import accuracy_score 
+import seaborn as sns 
+import matplotlib.pyplot as plt 
+customers = pd.read_csv('customer_churn_dataset-testing-master.csv') 
+print(customers.head()) 
+print(customers.columns) 
+# cleaning the information of customers 
+X, y = customers[['Age','Tenure', 'Usage Frequency','Payment Delay','Total 
+Spend', 'Last Interaction']], customers['Churn'] 
+print('features:\n',X,'Churn:\n',y) 
+# scale the features 
+scaler = StandardScaler() 
+scaler.fit(X) 
+X_transformed = scaler.transform(X) 
+print('X_transformed:\n',X_transformed) 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20, 
+random_state=23) 
+clf = LogisticRegression(max_iter=10000, random_state=0) 
+clf.fit(X_train, y_train) 
+acc = accuracy_score(y_test, clf.predict(X_test)) * 100 
+print(f"Logistic Regression model accuracy: {acc:.2f}%") 
+Inference: 
+● The logistic regression model achieved an accuracy of approximately 80–85% 
+(depending on the dataset). 
+● Coefficients show the direction and magnitude of each feature’s impact on churn 
+probability. 
+● Positive coefficients indicate features that increase churn risk, while negative ones 
+indicate customer retention factors. 
+Result:  
+The model effectively predicts customer churn using the selected features.High Payment Delay 
+and Long Time Since Last Interaction increase churn likelihood.High Tenure and High Total 
+Spend are associated with lower churn risk.These insights can help the company focus on 
+customers showing early signs of disengagement or delayed payments. 
+exp 3
+Statistical Analysis 
+Aim: You have collected data from a class of students, recording the number of hours each student 
+studied for a particular exam and their corresponding score. Formulate a null and alternative 
+hypothesis regarding the relationship between study hours and exam scores. Perform a correlation 
+analysis and, if appropriate, a simple linear regression to investigate this relationship. Interpret the 
+statistical results to either support or reject your hypothesis at a chosen significance level. 
+Dataset: 
+Description: The data consists of Marks of students including their study time & number of courses. 
+The dataset is downloaded from UCI Machine Learning Repository. 
+Properties of the Dataset:  
+Number of Instances: 100 
+Number of Attributes: 3 including the target variable that are number of courses, the time spent for 
+studying and finally the marks obtained in the subject. 
+Procedure: 
+Step 1: Data Preparation 
+First, the script uses the pandas library to read the student data from a CSV file named 
+students.csv. It assumes this file exists and has two columns: 'hours' and 'scores'. The data 
+is then converted into NumPy arrays to be used in the statistical calculations. 
+Step 2: Correlation Analysis 
+The script performs a Pearson correlation analysis using the scipy library to determine the 
+relationship between study hours and scores. It calculates two key values: 
+• The correlation coefficient, which indicates the strength and direction of the 
+relationship. 
+• The p-value, which helps determine if the correlation is statistically significant. 
+Step 3: Simple Linear Regression Model 
+Next, the script builds a linear regression model using the scikit-learn library. This model 
+finds the best-fit straight line that represents the relationship between hours and scores. 
+• The slope of this line represents how much a student's score is expected to increase 
+for each additional hour of study. 
+• The intercept represents the baseline score a student would get with zero study hours. 
+Step 4: Model Evaluation 
+Finally, the script evaluates the model's performance by calculating the mean squared error 
+(MSE). The MSE measures the average squared difference between the actual scores and the 
+scores predicted by the model. A lower MSE indicates that the model is more accurate in its 
+predictions. 
 
 
+
+
+Program: 
+# student_data_analysis.py 
+import numpy as np 
+import pandas as pd 
+from scipy import stats 
+from sklearn.linear_model import LinearRegression 
+from sklearn.metrics import mean_squared_error 
+# Load data 
+data = pd.read_csv('students.csv', delimiter=',') 
+print(data.head()) 
+# Prepare data for analysis 
+study_hours = np.array(data['hours']) 
+scores = np.array(data['scores']) 
+# HYPOTHESIS 
+# H0: no correlation between the study hours and the results corr = 0 
+# H1: correlation exists corr !=0 
+# correlation analysis 
+corr_coef, p_value_corr = stats.pearsonr(study_hours, scores) 
+print(f"Correlation coefficient: {corr_coef:.3f}, p-val: {p_value_corr:.3e}") 
+# simple linear regression 
+X = study_hours.reshape(-1, 1) 
+model = LinearRegression().fit(X, scores) 
+print(f"Intercept: {model.intercept_:.3f}") 
+print(f"Slope: {model.coef_[0]:.3f}") 
+# predict for demonstration 
+pred = model.predict(X) 
+print("predicted scores:", pred) 
+# Evaluate the model 
+print(f"Mean squared error: {mean_squared_error(scores, pred)}")
