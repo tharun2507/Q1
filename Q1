@@ -1,20 +1,4 @@
-import numpy as np
-import pandas as pd
-from sklearn.model_selection import train_test_split, GridSearchCV
-from sklearn.naive_bayes import GaussianNB, BernoulliNB
-from sklearn.svm import SVC
-from sklearn.linear_model import LogisticRegression, LinearRegression
-from sklearn.metrics import classification_report, confusion_matrix, accuracy_score, mean_squared_error, r2_score
-from sklearn.preprocessing import StandardScaler
-from sklearn.decomposition import PCA
-from sklearn.pipeline import Pipeline
-import matplotlib.pyplot as plt
-import networkx as nx
-from scipy import linalg
-import warnings
-
-warnings.filterwarnings("ignore")
- 1 
+1
 # Sample gender dataset 
 data = { 
 'long_hair': [1, 0, 1, 0, 1, 0, 0, 1], 
@@ -36,82 +20,133 @@ y_pred = model.predict(X_test)
 print("Accuracy:", accuracy_score(y_test, y_pred)) 
 print("Classification Report:\n", classification_report(y_test, y_pred)) 
 2
-# Synthetic credit card dataset 
-data = { 
-'Amount': [100, 20000, 50, 15000, 30, 1000, 25000, 70], 
-'TransactionTime': [12, 3, 14, 2, 11, 8, 4, 15], 
-'Feature1': [0.1, 0.9, 0.3, 0.8, 0.2, 0.5, 0.95, 0.25], 
-'Feature2': [0.2, 0.8, 0.4, 0.85, 0.3, 0.55, 0.99, 0.35], 
-'Class': [0, 1, 0, 1, 0, 0, 1, 0]  # 1 = Fraud 
-} 
-df = pd.DataFrame(data) 
-X = df.drop(columns='Class') 
-y = df['Class'] 
-scaler = StandardScaler() 
-X_scaled = scaler.fit_transform(X) 
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.25, random_state=42) 
-svm = SVC(kernel='rbf', class_weight='balanced') 
-svm.fit(X_train, y_train) 
-y_pred = svm.predict(X_test) 
-print("Accuracy:", accuracy_score(y_test, y_pred)) 
-print("Classification Report:\n", classification_report(y_test, y_pred))
-3
-# Simple synthetic heart dataset 
-data = { 
-'age': [29, 50, 45, 60, 35, 40, 55, 65], 
-'cholesterol': [210, 250, 230, 290, 220, 240, 280, 300], 
-'bp': [120, 140, 135, 160, 125, 130, 155, 165], 
-'max_hr': [150, 130, 140, 120, 155, 145, 110, 100], 
-'target': [0, 1, 0, 1, 0, 0, 1, 1]  # 1 = heart disease 
-} 
-df = pd.DataFrame(data) 
-X = df.drop(columns='target') 
-y = df['target'] 
-scaler = StandardScaler() 
-X_scaled = scaler.fit_transform(X) 
-X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.25, random_state=42) 
-model = LogisticRegression() 
-model.fit(X_train, y_train) 
-y_pred = model.predict(X_test) 
-print("Accuracy:", accuracy_score(y_test, y_pred)) 
-print("Classification Report:\n", classification_report(y_test, y_pred))
-4
-import numpy as np
 import pandas as pd
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+from sklearn.metrics import accuracy_score, classification_report
 
-# Synthetic medical cost dataset
+# Example dataset
 data = {
-    'age': [25, 32, 47, 51, 62, 28, 36, 44],
-    'sex': ['male', 'female', 'female', 'male', 'male', 'female', 'female', 'male'],
-    'bmi': [22.4, 27.8, 30.2, 25.3, 31.1, 23.5, 28.2, 29.4],
-    'children': [0, 1, 2, 1, 3, 0, 2, 1],
-    'smoker': ['no', 'no', 'yes', 'yes', 'yes', 'no', 'no', 'yes'],
-    'region': ['southwest', 'southeast', 'northwest', 'northeast', 'southwest', 'southeast',
-               'northwest', 'northeast'],
-    'charges': [2500, 3200, 41000, 38000, 42000, 2600, 3500, 39000]
+    'Amount':[100,20000,50,15000,30,1000,25000,70],
+    'TransactionTime':[12,3,14,2,11,8,4,15],
+    'Feature1':[0.1,0.9,0.3,0.8,0.2,0.5,0.95,0.25],
+    'Feature2':[0.2,0.8,0.4,0.85,0.3,0.55,0.99,0.35],
+    'Class':[0,1,0,1,0,0,1,0]   # 1 = Fraud
 }
+
 df = pd.DataFrame(data)
 
-# One-hot encode categorical features
-X = pd.get_dummies(df.drop(columns='charges'), drop_first=True)
-y = df['charges']
+# Split
+X = df.drop(columns=['Class'])
+y = df['Class']
 
-# Train/test split
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
 
-# Fit linear regression
-model = LinearRegression()
+# Scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# SVM Model
+svm = SVC(kernel='rbf', class_weight='balanced')
+svm.fit(X_train, y_train)
+
+# Predictions
+y_pred = svm.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+print("Predicted:", list(y_pred))
+3
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import accuracy_score, classification_report
+
+# Example dataset
+data = {
+    'age':[29,50,45,60,35,40,55,65],
+    'cholesterol':[210,250,230,290,220,240,280,300],
+    'bp':[120,140,135,160,125,130,155,165],
+    'max_hr':[150,130,140,120,155,145,110,100],
+    'target':[0,1,0,1,0,0,1,1]   # 1 = heart disease
+}
+
+df = pd.DataFrame(data)
+
+# Split
+X = df.drop(columns=['target'])
+y = df['target']
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+# Scaling
+scaler = StandardScaler()
+X_train = scaler.fit_transform(X_train)
+X_test = scaler.transform(X_test)
+
+# Logistic Regression
+model = LogisticRegression(max_iter=1000)
 model.fit(X_train, y_train)
+
+# Predict
 y_pred = model.predict(X_test)
 
-# Metrics (works on all sklearn versions)
-rmse = np.sqrt(mean_squared_error(y_test, y_pred))
-print("Predicted Charges:", y_pred)
-print("RMSE:", rmse)
-print("R^2 Score:", r2_score(y_test, y_pred))
+print("Accuracy:", accuracy_score(y_test, y_pred))
+print("\nClassification Report:\n", classification_report(y_test, y_pred))
+print("Predicted:", list(y_pred))
+4
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import OneHotEncoder, StandardScaler
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, r2_score
+import numpy as np
+
+data = {
+    'age':[25,32,47,51,62,28,36,44],
+    'sex':['male','female','female','male','male','female','female','male'],
+    'bmi':[22.4,27.8,30.2,25.3,31.1,23.5,28.2,29.4],
+    'children':[0,1,2,1,3,0,2,1],
+    'smoker':['no','no','yes','yes','yes','no','no','yes'],
+    'region':['southwest','southeast','northwest','northeast','southwest','southeast','northwest','northeast'],
+    'charges':[2500,3200,41000,38000,42000,2600,3500,39000]
+}
+
+df = pd.DataFrame(data)
+
+X = df.drop(columns=['charges'])
+y = df['charges']
+
+cat_cols = ['sex', 'smoker', 'region']
+num_cols = ['age', 'bmi', 'children']
+
+preprocess = ColumnTransformer([
+    ('num', StandardScaler(), num_cols),
+    ('cat', OneHotEncoder(drop='first', handle_unknown='ignore'), cat_cols)
+])
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+X_train_trans = preprocess.fit_transform(X_train)
+X_test_trans = preprocess.transform(X_test)
+
+model = LinearRegression()
+model.fit(X_train_trans, y_train)
+y_pred = model.predict(X_test_trans)
+
+print("Predicted charges:", y_pred)
+print("RMSE:", np.sqrt(mean_squared_error(y_test, y_pred)))
+print("R² Score:", r2_score(y_test, y_pred))
 5
 import numpy as np 
 # Get matrix input at runtime 
@@ -154,8 +189,13 @@ print("Eigenvectors of A:\n", eigvec_A)
 print("\nEigenvalues of B:", eigval_B) 
 print("Eigenvectors of B:\n", eigvec_B) 
 print("\nSum of Eigenvectors:\n", sum_eigvec) 
-print("\nDiagonal Matrix of C:\n", diag_C)
+print("\nDiagonal Matrix of C:\n", diag_C) 
 7
+import pandas as pd 
+from sklearn.model_selection import train_test_split, GridSearchCV 
+from sklearn.svm import SVC 
+from sklearn.linear_model import LogisticRegression 
+from sklearn.metrics import classification_report 
 # Synthetic heart disease dataset 
 data = {'age':[45,54,37,62,29,49,58,41], 
 'cholesterol':[210,240,180,270,190,220,260,200], 
@@ -180,7 +220,7 @@ print("Best Logistic Regression Params:", grid_lr.best_params_)
 y_pred_svm = grid_svm.predict(X_test) 
 y_pred_lr = grid_lr.predict(X_test) 
 print("\nSVM Classification Report:\n", classification_report(y_test, y_pred_svm)) 
-print("\nLogistic Regression Classification Report:\n", classification_report(y_test, y_pred_lr)) 
+print("\nLogistic Regression Classification Report:\n", classification_report(y_test, y_pred_lr))
 8
 import networkx as nx 
 import pandas as pd 
@@ -227,52 +267,7 @@ X_pca = pca.fit_transform(X_scaled)
 X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.3, random_state=42) 
 svm = SVC(kernel='linear') 
 svm.fit(X_train, y_train) 
-y_pred = svm.predict(X_test) 
+y_pred = svm.predict(X_test)  
 print("\nClassification Report:\n", classification_report(y_test, y_pred))
-10
-def train_nb_gender(df, test_size=0.2, random_state=42, discrete_cols=None):
-    """
-    df: pandas DataFrame with described columns including 'gender' (Male/Female)
-    discrete_cols: list of column names that are binary/discrete (0/1). If None, inferred.
-    Returns: trained model (GaussianNB or BernoulliNB), X_test, y_test
-    """
 
-    # identify features
-    if 'gender' not in df.columns:
-        raise ValueError("DataFrame must contain 'gender' column")
 
-    X = df.drop(columns=['gender'])
-    y = df['gender'].map({'Male': 1, 'Female': 0})  # encode
-
-    # infer discrete columns
-    if discrete_cols is None:
-        discrete_cols = [
-            c for c in X.columns
-            if set(X[c].dropna().unique()).issubset({0, 1})
-        ]
-
-    numeric_cols = [c for c in X.columns if c not in discrete_cols]
-
-    # train-test split (fixed line break)
-    X_train, X_test, y_train, y_test = train_test_split(
-        X, y,
-        test_size=test_size,
-        random_state=random_state,
-        stratify=y
-    )
-
-    # choose NB type
-    if len(numeric_cols) == 0:
-        model = BernoulliNB()
-    else:
-        model = GaussianNB()
-
-    # train model
-    model.fit(X_train.values, y_train.values)
-
-    # evaluate
-    y_pred = model.predict(X_test.values)
-    print("Accuracy:", accuracy_score(y_test, y_pred))
-    print("Classification report:\n", classification_report(y_test, y_pred))
-
-    return model, X_test, y_test
