@@ -505,3 +505,360 @@ ck = CuckooHash()
 for k in ["apple","banana","cherry","date","fig","grape"]:
     ck.insert(k)
 ck.show()
+
+ML
+"""
+ML LAB – Combined Code (Compact Version)
+
+Ex1: Image Classification using OpenCV + SVM
+Ex2: Text & Audio Processing
+Ex3: Classification using SVM, Logistic Regression, MLP
+Ex4: Bagging, Boosting, Stacking (Ensemble)
+Ex5: K-Means, Hierarchical Clustering, GMM
+"""
+
+# ================= IMPORTS (Required Libraries) =================
+import os, re, string
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+
+# ML core
+from sklearn.datasets import load_iris, load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.metrics import (
+    accuracy_score, confusion_matrix, classification_report,
+    roc_curve, auc
+)
+from sklearn.svm import SVC
+from sklearn.linear_model import LogisticRegression
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.cluster import KMeans, AgglomerativeClustering
+from sklearn.mixture import GaussianMixture
+from sklearn.ensemble import RandomForestClassifier, StackingClassifier
+from sklearn.decomposition import PCA
+from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+# Deep learning
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.utils import to_categorical
+
+# NLP
+import nltk
+from nltk.tokenize import word_tokenize
+from nltk.corpus import stopwords
+from nltk.stem import WordNetLemmatizer
+
+# Audio
+import librosa, librosa.display
+import IPython.display as ipd
+
+# Image
+import cv2
+
+# Hierarchical clustering
+from scipy.cluster.hierarchy import linkage, dendrogram
+
+# Boosting
+from xgboost import XGBClassifier
+
+# NLTK downloads (run once)
+nltk.download('punkt')
+nltk.download('stopwords')
+nltk.download('wordnet')
+
+# =========================================================
+# Ex1: IMAGE CLASSIFICATION USING OPENCV + SVM
+# =========================================================
+def ex1_image_classification():
+    data_dir = "./Car-Bike-Dataset"   # FOLDER: Car-Bike-Dataset/Bike, Car
+    classes = ["Bike", "Car"]
+    X, y = [], []
+
+    for label, cls in enumerate(classes):
+        folder = os.path.join(data_dir, cls)
+        if not os.path.isdir(folder):
+            continue
+        for f in os.listdir(folder):
+            path = os.path.join(folder, f)
+            img = cv2.imread(path)
+            if img is None:
+                continue
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            gray = cv2.resize(gray, (64, 64)).flatten()
+            X.append(gray); y.append(label)
+
+    X = np.array(X); y = np.array(y)
+    print("\n[Ex1] Total images:", len(X))
+
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42, stratify=y
+    )
+
+    svm = SVC(kernel='linear')
+    svm.fit(X_train, y_train)
+    y_pred = svm.predict(X_test)
+
+    print("Accuracy:", accuracy_score(y_test, y_pred))
+    print("Confusion Matrix:\n", confusion_matrix(y_test, y_pred))
+    print("Classification Report:\n",
+          classification_report(y_test, y_pred, target_names=classes))
+
+    # Show a few predictions
+    plt.figure(figsize=(7, 7))
+    for i in range(min(9, len(X_test))):
+        idx = np.random.randint(0, len(X_test))
+        plt.subplot(3, 3, i+1)
+        plt.imshow(X_test[idx].reshape(64, 64), cmap='gray')
+        plt.title(f"T:{classes[y_test[idx]]}\nP:{classes[y_pred[idx]]}")
+        plt.axis("off")
+    plt.tight_layout()
+    plt.show()
+
+# =========================================================
+# Ex2: TEXT & AUDIO PROCESSING
+# =========================================================
+def ex2_text_processing():
+    print("\n[Ex2 – TEXT PROCESSING]")
+    text = "Python is GREAT!!! It is used for NLP, AI, and Data Science 123."
+    # Clean text
+    text_clean = text.lower()
+    text_clean = re.sub(r'\d+', '', text_clean)
+    text_clean = text_clean.translate(str.maketrans('', '', string.punctuation))
+    print("Cleaned:", text_clean)
+
+    # Tokenization + stopwords + lemmatization
+    words = word_tokenize(text_clean)
+    stop_words = set(stopwords.words('english'))
+    lem = WordNetLemmatizer()
+    words_proc = [lem.lemmatize(w) for w in words if w not in stop_words]
+    print("Processed tokens:", words_proc)
+
+    # Bag of Words + TF-IDF
+    corpus = ["Python is great", "Python is used for NLP"]
+    cv = CountVectorizer()
+    X_bow = cv.fit_transform(corpus)
+    print("BoW features:", cv.get_feature_names_out())
+    print(X_bow.toarray())
+
+    tfidf = TfidfVectorizer()
+    X_tfidf = tfidf.fit_transform(corpus)
+    print("TF-IDF features:", tfidf.get_feature_names_out())
+    print(X_tfidf.toarray())
+
+def analyze_audio_file(file_path):
+    try:
+        y, sr = librosa.load(file_path, sr=None)
+        frame_length, hop_length = 1024, 512
+
+        # Simple energy and ZCR for voiced/unvoiced idea
+        energy = np.array([
+            np.sum(y[i:i+frame_length] ** 2)
+            for i in range(0, len(y) - frame_length, hop_length)
+        ])
+        zcr = librosa.feature.zero_crossing_rate(
+            y=y, frame_length=frame_length, hop_length=hop_length
+        )[0]
+        voiced = (energy > 0.01) & (zcr < 0.1)
+
+        mfcc = librosa.feature.mfcc(y=y, sr=sr, n_mfcc=13)
+
+        print(f"\n[Ex2 – AUDIO] File: {file_path}")
+
+        # Waveform
+        plt.figure(figsize=(10, 3))
+        librosa.display.waveshow(y, sr=sr)
+        plt.title("Waveform")
+        plt.tight_layout()
+        plt.show()
+
+        # MFCCs
+        plt.figure(figsize=(10, 3))
+        librosa.display.specshow(mfcc, x_axis='time', sr=sr)
+        plt.colorbar()
+        plt.title("MFCCs")
+        plt.tight_layout()
+        plt.show()
+
+        # Audio player (works in Jupyter)
+        ipd.display(ipd.Audio(data=y, rate=sr))
+    except Exception as e:
+        print("Error processing", file_path, ":", e)
+
+def ex2_audio_processing():
+    files = ["a.wav", "e.wav", "i.wav", "o.wav", "u.wav", "mask.wav"]
+    for f in files:
+        analyze_audio_file(f)
+
+# =========================================================
+# Ex3: SVM, LOGISTIC REGRESSION, MLP (IRIS)
+# =========================================================
+def ex3_svm_logistic_mlp():
+    print("\n[Ex3 – SVM, LOGISTIC, MLP]")
+    iris = load_iris()
+    X, y = iris.data, iris.target
+
+    # Common train-test split + scaling
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+    scaler = StandardScaler()
+    X_train_s = scaler.fit_transform(X_train)
+    X_test_s = scaler.transform(X_test)
+
+    # ---- SVM ----
+    svm = SVC(kernel='linear')
+    svm.fit(X_train_s, y_train)
+    y_pred_svm = svm.predict(X_test_s)
+    print("\nSVM Accuracy:", accuracy_score(y_test, y_pred_svm))
+
+    # ---- Logistic Regression ----
+    log = LogisticRegression(max_iter=200)
+    log.fit(X_train_s, y_train)
+    y_pred_log = log.predict(X_test_s)
+    print("Logistic Accuracy:", accuracy_score(y_test, y_pred_log))
+
+    # ---- MLP ----
+    y_cat = to_categorical(y)
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        scaler.fit_transform(X), y_cat, test_size=0.2, random_state=42
+    )
+    mlp = Sequential([
+        Dense(10, activation='relu', input_dim=4),
+        Dense(3, activation='softmax')
+    ])
+    mlp.compile(optimizer='adam',
+                loss='categorical_crossentropy',
+                metrics=['accuracy'])
+    mlp.fit(X_tr, y_tr, epochs=40, batch_size=10, verbose=0)
+    loss, acc = mlp.evaluate(X_te, y_te, verbose=0)
+    print("MLP Accuracy:", acc)
+
+# =========================================================
+# Ex4: BAGGING, BOOSTING, STACKING (ENSEMBLES)
+# =========================================================
+def ex4_ensembles():
+    print("\n[Ex4 – ENSEMBLE METHODS]")
+    iris = load_iris()
+    X, y = iris.data, iris.target
+    X_train, X_test, y_train, y_test = train_test_split(
+        X, y, test_size=0.2, random_state=42
+    )
+
+    # Bagging – Random Forest
+    rf = RandomForestClassifier(n_estimators=100, random_state=42)
+    rf.fit(X_train, y_train)
+    print("Bagging (RandomForest) Acc:",
+          accuracy_score(y_test, rf.predict(X_test)))
+
+    # Boosting – XGBoost
+    xgb = XGBClassifier(
+        n_estimators=100,
+        learning_rate=0.1,
+        random_state=42,
+        use_label_encoder=False,
+        eval_metric='mlogloss'
+    )
+    xgb.fit(X_train, y_train)
+    print("Boosting (XGBoost) Acc:",
+          accuracy_score(y_test, xgb.predict(X_test)))
+
+    # Stacking
+    base = [
+        ('knn', KNeighborsClassifier(n_neighbors=3)),
+        ('dt', DecisionTreeClassifier(max_depth=3))
+    ]
+    meta = SVC(kernel='linear', probability=True)
+    stack = StackingClassifier(estimators=base, final_estimator=meta)
+    stack.fit(X_train, y_train)
+    print("Stacking Acc:",
+          accuracy_score(y_test, stack.predict(X_test)))
+
+# =========================================================
+# Ex5: K-MEANS, HIERARCHICAL, GMM (IRIS + WINE)
+# =========================================================
+def ex5_clustering():
+    print("\n[Ex5 – CLUSTERING]")
+    iris = load_iris()
+    X_iris, y_iris = iris.data, iris.target
+
+    # ---- K-Means (Iris) ----
+    km = KMeans(n_clusters=3, random_state=42, n_init=10)
+    labels_km = km.fit_predict(X_iris)
+    plt.scatter(X_iris[:, 0], X_iris[:, 1], c=labels_km, cmap='viridis')
+    plt.scatter(km.cluster_centers_[:, 0], km.cluster_centers_[:, 1],
+                c='red', marker='X', s=200)
+    plt.title("K-Means – Iris (first 2 features)")
+    plt.show()
+
+    # ---- Hierarchical Clustering (Iris) ----
+    linked = linkage(X_iris, method='ward')
+    plt.figure(figsize=(8, 4))
+    dendrogram(linked)
+    plt.title("Hierarchical Dendrogram – Iris")
+    plt.show()
+
+    hc = AgglomerativeClustering(n_clusters=3, linkage='ward')
+    labels_hc = hc.fit_predict(X_iris)
+    plt.scatter(X_iris[:, 0], X_iris[:, 1], c=labels_hc, cmap='viridis')
+    plt.title("Agglomerative – Iris (first 2 features)")
+    plt.show()
+
+    # ---- GMM (Iris) ----
+    scaler = StandardScaler()
+    X_iris_s = scaler.fit_transform(X_iris)
+    gmm = GaussianMixture(n_components=3, random_state=0)
+    labels_gmm = gmm.fit_predict(X_iris_s)
+    df_iris = pd.DataFrame(X_iris_s, columns=iris.feature_names)
+    df_iris['Cluster'] = labels_gmm
+    df_iris['True'] = y_iris
+    sns.scatterplot(data=df_iris,
+                    x='sepal length (cm)', y='sepal width (cm)',
+                    hue='Cluster', style='True', palette='viridis')
+    plt.title("GMM – Iris")
+    plt.show()
+
+    print("GMM Means:\n", gmm.means_)
+
+    # ---- K-Means + Hierarchical (Wine) ----
+    wine = load_wine()
+    X_wine = wine.data
+
+    km_w = KMeans(n_clusters=3, random_state=42, n_init=10)
+    labels_wine = km_w.fit_predict(X_wine)
+    plt.scatter(X_wine[:, 0], X_wine[:, 1], c=labels_wine, cmap='viridis')
+    plt.title("K-Means – Wine (first 2 features)")
+    plt.show()
+
+    linked_w = linkage(X_wine, method='ward')
+    plt.figure(figsize=(8, 4))
+    dendrogram(linked_w)
+    plt.title("Hierarchical Dendrogram – Wine")
+    plt.show()
+
+# =========================================================
+# MAIN – Uncomment the experiment(s) you want to run
+# =========================================================
+if __name__ == "__main__":
+    # Ex1: Image Classification
+    # ex1_image_classification()
+
+    # Ex2: Text & Audio
+    # ex2_text_processing()
+    # ex2_audio_processing()
+
+    # Ex3: SVM, Logistic, MLP
+    # ex3_svm_logistic_mlp()
+
+    # Ex4: Ensembles
+    # ex4_ensembles()
+
+    # Ex5: Clustering
+    # ex5_clustering()
+
+    print("👉 Uncomment the function calls in main() to run each experiment.")
+
