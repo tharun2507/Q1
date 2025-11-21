@@ -1,273 +1,507 @@
-1
-# Sample gender dataset 
-data = { 
-'long_hair': [1, 0, 1, 0, 1, 0, 0, 1], 
-'forehead_width_cm': [15, 14, 16, 13, 15.5, 14.2, 13.5, 16], 
-'forehead_height_cm': [6, 7, 6.5, 8, 6, 7.5, 8.2, 6.3], 
-'nose_wide': [0, 1, 0, 1, 0, 1, 1, 0], 
-'nose_long': [0, 1, 0, 1, 0, 1, 1, 0], 
-'lips_thin': [0, 1, 0, 1, 0, 1, 0, 0], 
-'distance_nose_to_lip_long': [0, 1, 0, 1, 0, 1, 1, 0], 
-'gender': ['Female', 'Male', 'Female', 'Male', 'Female', 'Male', 'Male', 'Female'] 
-} 
-df = pd.DataFrame(data) 
-X = df.drop(columns='gender') 
-y = df['gender'] 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42) 
-model = GaussianNB() 
-model.fit(X_train, y_train) 
-y_pred = model.predict(X_test) 
-print("Accuracy:", accuracy_score(y_test, y_pred)) 
-print("Classification Report:\n", classification_report(y_test, y_pred)) 
-2
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report
+import heapq
 
-# Example dataset
-data = {
-    'Amount':[100,20000,50,15000,30,1000,25000,70],
-    'TransactionTime':[12,3,14,2,11,8,4,15],
-    'Feature1':[0.1,0.9,0.3,0.8,0.2,0.5,0.95,0.25],
-    'Feature2':[0.2,0.8,0.4,0.85,0.3,0.55,0.99,0.35],
-    'Class':[0,1,0,1,0,0,1,0]   # 1 = Fraud
-}
+def huffman(s):
+    h = [[s.count(c), [c, ""]] for c in set(s)]
+    heapq.heapify(h)
 
-df = pd.DataFrame(data)
+    while len(h) > 1:
+        a, b = heapq.heappop(h), heapq.heappop(h)
 
-# Split
-X = df.drop(columns=['Class'])
-y = df['Class']
+        for x in a[1:]: x[1] = '0' + x[1]
+        for x in b[1:]: x[1] = '1' + x[1]
 
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=42
-)
+        heapq.heappush(h, [a[0] + b[0]] + a[1:] + b[1:])
 
-# Scaling
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
+    return {c: code for c, code in h[0][1:]}
 
-# SVM Model
-svm = SVC(kernel='rbf', class_weight='balanced')
-svm.fit(X_train, y_train)
+msg = input("Enter text: ")
+cd = huffman(msg)
 
-# Predictions
-y_pred = svm.predict(X_test)
+print("\nHuffman Codes:")
+for c in sorted(cd):
+    print(f"'{c}': {cd[c]}")
 
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
-print("Predicted:", list(y_pred))
-3
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import StandardScaler
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import accuracy_score, classification_report
-
-# Example dataset
-data = {
-    'age':[29,50,45,60,35,40,55,65],
-    'cholesterol':[210,250,230,290,220,240,280,300],
-    'bp':[120,140,135,160,125,130,155,165],
-    'max_hr':[150,130,140,120,155,145,110,100],
-    'target':[0,1,0,1,0,0,1,1]   # 1 = heart disease
-}
-
-df = pd.DataFrame(data)
-
-# Split
-X = df.drop(columns=['target'])
-y = df['target']
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=42
-)
-
-# Scaling
-scaler = StandardScaler()
-X_train = scaler.fit_transform(X_train)
-X_test = scaler.transform(X_test)
-
-# Logistic Regression
-model = LogisticRegression(max_iter=1000)
-model.fit(X_train, y_train)
-
-# Predict
-y_pred = model.predict(X_test)
-
-print("Accuracy:", accuracy_score(y_test, y_pred))
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
-print("Predicted:", list(y_pred))
-4
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.compose import ColumnTransformer
-from sklearn.preprocessing import OneHotEncoder, StandardScaler
-from sklearn.linear_model import LinearRegression
-from sklearn.metrics import mean_squared_error, r2_score
-import numpy as np
-
-data = {
-    'age':[25,32,47,51,62,28,36,44],
-    'sex':['male','female','female','male','male','female','female','male'],
-    'bmi':[22.4,27.8,30.2,25.3,31.1,23.5,28.2,29.4],
-    'children':[0,1,2,1,3,0,2,1],
-    'smoker':['no','no','yes','yes','yes','no','no','yes'],
-    'region':['southwest','southeast','northwest','northeast','southwest','southeast','northwest','northeast'],
-    'charges':[2500,3200,41000,38000,42000,2600,3500,39000]
-}
-
-df = pd.DataFrame(data)
-
-X = df.drop(columns=['charges'])
-y = df['charges']
-
-cat_cols = ['sex', 'smoker', 'region']
-num_cols = ['age', 'bmi', 'children']
-
-preprocess = ColumnTransformer([
-    ('num', StandardScaler(), num_cols),
-    ('cat', OneHotEncoder(drop='first', handle_unknown='ignore'), cat_cols)
-])
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=42
-)
-
-X_train_trans = preprocess.fit_transform(X_train)
-X_test_trans = preprocess.transform(X_test)
-
-model = LinearRegression()
-model.fit(X_train_trans, y_train)
-y_pred = model.predict(X_test_trans)
-
-print("Predicted charges:", y_pred)
-print("RMSE:", np.sqrt(mean_squared_error(y_test, y_pred)))
-print("R² Score:", r2_score(y_test, y_pred))
-5
-import numpy as np 
-# Get matrix input at runtime 
-A = np.array([[1, 2], [3, 4]]) 
-B = np.array([[5, 6], [7, 8]]) 
-# Matrix operations 
-C = np.dot(A, B) 
-D = A + B 
-det_C = np.linalg.det(C) 
-det_D = np.linalg.det(D) 
-transpose_C = np.transpose(C) 
-transpose_D = np.transpose(D) 
-# Display results 
-print("Matrix A:\n", A) 
-print("Matrix B:\n", B) 
-print("\nC = A dot B:\n", C) 
-print("\nD = A + B:\n", D) 
-print("\nDeterminant of C:", det_C) 
-print("Determinant of D:", det_D) 
-print("\nTranspose of C:\n", transpose_C) 
-print("Transpose of D:\n", transpose_D)
-6
-import numpy as np 
-A = np.array([[2, 1], [1, 3]]) 
-B = np.array([[4, 2], [2, 3]]) 
-# a. Dot product 
-C = np.dot(A, B) 
-# b. Eigenvalues and Eigenvectors 
-eigval_A, eigvec_A = np.linalg.eig(A) 
-eigval_B, eigvec_B = np.linalg.eig(B) 
-# c. Add eigenvectors 
-sum_eigvec = eigvec_A + eigvec_B 
-# d. Diagonal matrix of C 
-diag_C = np.diag(np.diag(C)) 
-print("Matrix A:\n", A) 
-print("Matrix B:\n", B) 
-print("\nC = A dot B:\n", C) 
-print("\nEigenvalues of A:", eigval_A) 
-print("Eigenvectors of A:\n", eigvec_A) 
-print("\nEigenvalues of B:", eigval_B) 
-print("Eigenvectors of B:\n", eigvec_B) 
-print("\nSum of Eigenvectors:\n", sum_eigvec) 
-print("\nDiagonal Matrix of C:\n", diag_C) 
-7
-import pandas as pd 
-from sklearn.model_selection import train_test_split, GridSearchCV 
-from sklearn.svm import SVC 
-from sklearn.linear_model import LogisticRegression 
-from sklearn.metrics import classification_report 
-# Synthetic heart disease dataset 
-data = {'age':[45,54,37,62,29,49,58,41], 
-'cholesterol':[210,240,180,270,190,220,260,200], 
-'bp':[130,150,120,160,110,140,155,125], 
-'target':[1,1,0,1,0,1,1,0]}  # 1=heart disease 
-df = pd.DataFrame(data) 
-X = df.drop('target', axis=1) 
-y = df['target'] 
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.25, random_state=42) 
-# Grid Search for SVM 
-svm = SVC() 
-param_grid = {'C':[0.1,1,10], 'kernel':['linear','rbf']} 
-grid_svm = GridSearchCV(svm, param_grid, cv=3) 
-grid_svm.fit(X_train, y_train) 
-# Logistic Regression with Grid Search 
-log_reg = LogisticRegression() 
-param_grid_lr = {'C':[0.1,1,10], 'max_iter':[100,200]} 
-grid_lr = GridSearchCV(log_reg, param_grid_lr, cv=3) 
-grid_lr.fit(X_train, y_train) 
-print("Best SVM Params:", grid_svm.best_params_) 
-print("Best Logistic Regression Params:", grid_lr.best_params_) 
-y_pred_svm = grid_svm.predict(X_test) 
-y_pred_lr = grid_lr.predict(X_test) 
-print("\nSVM Classification Report:\n", classification_report(y_test, y_pred_svm)) 
-print("\nLogistic Regression Classification Report:\n", classification_report(y_test, y_pred_lr))
-8
-import networkx as nx 
-import pandas as pd 
-import matplotlib.pyplot as plt 
- 
-# Example edges 
-data = {'source':[1,1,2,3,4,5], 
-        'target':[2,3,4,4,5,6]} 
-df = pd.DataFrame(data) 
- 
-G = nx.from_pandas_edgelist(df, 'source', 'target') 
-deg = nx.degree_centrality(G) 
-bet = nx.betweenness_centrality(G) 
-clo = nx.closeness_centrality(G) 
-shortest_paths = dict(nx.all_pairs_shortest_path_length(G)) 
-print("Degree Centrality:", deg) 
-print("\nBetweenness Centrality:", bet) 
-print("\nCloseness Centrality:", clo) 
-print("\nShortest Paths:\n", shortest_paths) 
-# Draw graph 
-nx.draw_spring(G, with_labels=True, node_color='lightblue') 
-plt.show()
-9
-import pandas as pd 
-from sklearn.preprocessing import StandardScaler 
-from sklearn.decomposition import PCA 
-from sklearn.svm import SVC 
-from sklearn.model_selection import train_test_split 
-from sklearn.metrics import classification_report 
-# Example dataset 
-df = pd.DataFrame({ 
-'attr1':[2,4,6,8,10,12], 
-'attr2':[1,3,5,7,9,11], 
-'label':[0,0,0,1,1,1] 
-}) 
-X = df[['attr1','attr2']] 
-y = df['label'] 
-corr = X.corr() 
-print("Correlation Matrix:\n", corr) 
-# PCA 
-X_scaled = StandardScaler().fit_transform(X) 
-pca = PCA(n_components=1) 
-X_pca = pca.fit_transform(X_scaled) 
-X_train, X_test, y_train, y_test = train_test_split(X_pca, y, test_size=0.3, random_state=42) 
-svm = SVC(kernel='linear') 
-svm.fit(X_train, y_train) 
-y_pred = svm.predict(X_test)  
-print("\nClassification Report:\n", classification_report(y_test, y_pred))
+enc = ''.join(cd[c] for c in msg)
+print("\nEncoded :", enc)
+print("Original Bits  :", len(msg)*8)
+print("Compressed Bits:", len(enc))
+print("Ratio:", round((len(msg)*8)/len(enc), 2))
 
 
+def lcs(a,b):
+    m,n=len(a),len(b)
+    dp=[[0]*(n+1) for _ in range(m+1)]
+    for i in range(m):
+        for j in range(n):
+            dp[i+1][j+1]=dp[i][j]+1 if a[i]==b[j] else max(dp[i][j+1],dp[i+1][j])
+    print("LCS Length:",dp[m][n])
+
+a=input("Seq1: ")
+b=input("Seq2: ")
+lcs(a,b)
+import math
+
+def tsp(cities):
+    n = len(cities)
+    visited = [False] * n
+    path = [0]
+    visited[0] = True
+    total = 0
+
+    for _ in range(n - 1):
+        last = path[-1]
+        nearest = min(
+            (i for i in range(n) if not visited[i]),
+            key=lambda i: math.dist(cities[last], cities[i])
+        )
+        total += math.dist(cities[last], cities[nearest])
+        path.append(nearest)
+        visited[nearest] = True
+
+    total += math.dist(cities[path[-1]], cities[0])
+    path.append(0)
+    return path, total
+
+cities = [(0,0), (2,3), (5,2), (6,6)]
+p, t = tsp(cities)
+print("Path:", p)
+print("Total Distance:", round(t, 2))
+
+import random, time
+
+# ----------- NORMAL QUICK SORT -----------
+def quick_sort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    pivot = arr[-1]       # choose last element as pivot
+    left = []             # items <= pivot
+    right = []            # items > pivot
+
+    for x in arr[:-1]:
+        if x <= pivot:
+            left.append(x)
+        else:
+            right.append(x)
+
+    return quick_sort(left) + [pivot] + quick_sort(right)
+
+
+# ----------- RANDOMIZED QUICK SORT -----------
+def randomized_quick_sort(arr):
+    if len(arr) <= 1:
+        return arr
+
+    pivot = random.choice(arr)   # random pivot
+    left = []
+    mid = []
+    right = []
+
+    for x in arr:
+        if x < pivot:
+            left.append(x)
+        elif x == pivot:
+            mid.append(x)
+        else:
+            right.append(x)
+
+    return randomized_quick_sort(left) + mid + randomized_quick_sort(right)
+
+
+# ----------- PERFORMANCE COMPARISON -----------
+data = [random.randint(1, 10000) for _ in range(1000)]
+
+start = time.time()
+quick_sort(data)
+print("Normal Quick Sort Time     :", round(time.time() - start, 5), "sec")
+
+start = time.time()
+randomized_quick_sort(data)
+print("Randomized Quick Sort Time :", round(time.time() - start, 5), "sec")
+
+print("\nNormal Quick Sort:     Avg O(n log n), Worst O(n²)")
+print("Randomized Quick Sort: Expected O(n log n)")
+
+import threading
+from queue import SimpleQueue
+
+# ----------------- 1. Singly Linked List (Mutex Lock) -----------------
+class Node:
+    def __init__(s,d,n=None): s.d=d; s.n=n
+
+class SLL:
+    def __init__(s): s.h=None; s.l=threading.Lock()
+    def insert(s,d):
+        with s.l: s.h=Node(d,s.h)
+    def show(s):
+        c=s.h
+        print("Mutex LL:", end=" ")
+        while c: print(c.d,end="->"); c=c.n
+        print("None")
+
+lst=SLL()
+t1=threading.Thread(target=lambda:[lst.insert(i) for i in [1,2,3]])
+t2=threading.Thread(target=lambda:[lst.insert(i) for i in [4,5,6]])
+t1.start(); t2.start(); t1.join(); t2.join()
+lst.show()
+
+
+# ----------------- 2. Fine-Grained Locking Linked List -----------------
+class NFG:
+    def __init__(s,d,n=None): s.d=d; s.n=n; s.l=threading.Lock()
+
+class FGL:
+    def __init__(s): s.h=NFG(None)
+    def insert(s,d):
+        nn=NFG(d); p=s.h; p.l.acquire()
+        c=p.n
+        if c: c.l.acquire()
+        nn.n=c; p.n=nn
+        if c: c.l.release()
+        p.l.release()
+    def show(s):
+        print("Fine-Grain LL:", end=" ")
+        c=s.h.n
+        while c: print(c.d,end="->"); c=c.n
+        print("None")
+
+fg=FGL()
+t1=threading.Thread(target=lambda:[fg.insert(i) for i in [1,2,3]])
+t2=threading.Thread(target=lambda:[fg.insert(i) for i in [4,5,6]])
+t1.start(); t2.start(); t1.join(); t2.join()
+fg.show()
+
+
+# ----------------- 3. Lock-Free Linked List (Queue) -----------------
+q = SimpleQueue()
+for i in [1,2,3,4,5,6]:
+    q.put(i)
+
+# Safe printing using copy
+temp = []
+temp_q = SimpleQueue()
+
+while not q.empty():
+    x = q.get()
+    temp.append(x)
+    temp_q.put(x)
+
+q = temp_q
+
+print("Lock-Free LL:", "->".join(str(i) for i in temp), "->None")
+
+# Graph Coloring
+class GraphColoring:
+    def __init__(self, graph):
+        self.graph = graph
+        self.V = len(graph)
+        self.colors = [0] * self.V
+
+    def is_safe(self, v, c):
+        for i in range(self.V):
+            if self.graph[v][i] == 1 and self.colors[i] == c:
+                return False
+        return True
+
+    def solve_util(self, m, v=0):
+        if v == self.V:
+            return True
+        for c in range(1, m+1):
+            if self.is_safe(v, c):
+                self.colors[v] = c
+                if self.solve_util(m, v+1):
+                    return True
+                self.colors[v] = 0
+        return False
+
+    def solve(self, m):
+        if self.solve_util(m):
+            print("Solution:", self.colors)
+        else:
+            print("No solution")
+
+# Example graph
+graph = [
+    [0, 1, 1, 1],
+    [1, 0, 1, 0],
+    [1, 1, 0, 1],
+    [1, 0, 1, 0]
+]
+
+gc = GraphColoring(graph)
+gc.solve(3)
+import threading
+from queue import SimpleQueue, Queue, LifoQueue
+import time, random
+
+# ===================== 1. Singly Linked List (Mutex Lock) =====================
+class Node:
+    def __init__(self, d, nxt=None):
+        self.d, self.n = d, nxt
+
+class MutexLL:
+    def __init__(self):
+        self.h = None
+        self.l = threading.Lock()
+
+    def insert(self, d):
+        with self.l:
+            self.h = Node(d, self.h)
+
+    def show(self):
+        print("\nMutex Linked List:", end=" ")
+        c = self.h
+        while c:
+            print(c.d, end="->")
+            c = c.n
+        print("None")
+
+mll = MutexLL()
+t1 = threading.Thread(target=lambda:[mll.insert(i) for i in [1,2,3]])
+t2 = threading.Thread(target=lambda:[mll.insert(i) for i in [4,5,6]])
+t1.start(); t2.start(); t1.join(); t2.join()
+mll.show()
+
+
+# ===================== 2. Fine-Grained Locking Linked List =====================
+class FGNode:
+    def __init__(self, d, nxt=None):
+        self.d, self.n = d, nxt
+        self.l = threading.Lock()
+
+class FineLL:
+    def __init__(self):
+        self.h = FGNode(None)  # dummy head
+
+    def insert(self, d):
+        new = FGNode(d)
+        p = self.h
+        p.l.acquire()
+        c = p.n
+        if c: c.l.acquire()
+        new.n = c
+        p.n = new
+        if c: c.l.release()
+        p.l.release()
+
+    def show(self):
+        print("Fine-Grained LL:", end=" ")
+        c = self.h.n
+        while c:
+            print(c.d, end="->")
+            c = c.n
+        print("None")
+
+fg = FineLL()
+t1 = threading.Thread(target=lambda:[fg.insert(i) for i in [1,2,3]])
+t2 = threading.Thread(target=lambda:[fg.insert(i) for i in [4,5,6]])
+t1.start(); t2.start(); t1.join(); t2.join()
+fg.show()
+
+
+# ===================== 3. Lock-Free Linked List (Queue-Based) =====================
+class LockFreeLL:
+    def __init__(self):
+        self.q = SimpleQueue()
+
+    def insert(self, d):
+        self.q.put(d)
+
+    def show(self):
+        temp = []
+        while not self.q.empty():
+            temp.append(self.q.get())
+        for v in temp: self.q.put(v)
+        print("Lock-Free LL:", "->".join(map(str, temp)), "->None")
+
+lf = LockFreeLL()
+t1 = threading.Thread(target=lambda:[lf.insert(i) for i in [1,2,3]])
+t2 = threading.Thread(target=lambda:[lf.insert(i) for i in [4,5,6]])
+t1.start(); t2.start(); t1.join(); t2.join()
+lf.show()
+
+
+# ===================== 4. Concurrent Queue (Blocking Queue) =====================
+q = Queue()
+
+def producer():
+    for i in range(1, 6):
+        q.put(i)
+        print("Produced", i)
+
+def consumer():
+    for _ in range(5):
+        print("Consumed", q.get())
+        q.task_done()
+
+t1 = threading.Thread(target=producer)
+t2 = threading.Thread(target=consumer)
+t1.start(); t2.start()
+t1.join(); t2.join()
+
+
+# ===================== 5. Lock-Free Queue (SimpleQueue) =====================
+lfq = SimpleQueue()
+
+def producer_lf():
+    for i in range(1, 6):
+        lfq.put(i)
+        print("Produced (LF)", i)
+
+def consumer_lf():
+    for _ in range(5):
+        print("Consumed (LF)", lfq.get())
+
+t3 = threading.Thread(target=producer_lf)
+t4 = threading.Thread(target=consumer_lf)
+t3.start(); t4.start()
+t3.join(); t4.join()
+
+
+# ===================== 6. Lock-Free Stack with Backoff =====================
+class LockFreeStack:
+    def __init__(self):
+        self.s = LifoQueue()
+
+    def push(self, item):
+        while True:
+            try:
+                self.s.put(item, block=False)
+                break
+            except:
+                time.sleep(random.uniform(0.001, 0.01))
+
+    def pop(self):
+        while True:
+            try:
+                return self.s.get(block=False)
+            except:
+                time.sleep(random.uniform(0.001, 0.01))
+                if self.s.empty(): return None
+
+    def show(self):
+        arr = list(self.s.queue)
+        print("Lock-Free Stack:", "->".join(map(str, arr[::-1])), "->None")
+
+stack = LockFreeStack()
+
+t1 = threading.Thread(target=lambda:[stack.push(i) for i in [1,2,3,4,5]])
+t2 = threading.Thread(target=lambda:[stack.pop() for _ in range(5)])
+t3 = threading.Thread(target=lambda:[stack.push(i) for i in [6,7,8,9,10]])
+t4 = threading.Thread(target=lambda:[stack.pop() for _ in range(5)])
+
+for t in [t1,t2,t3,t4]: t.start()
+for t in [t1,t2,t3,t4]: t.join()
+
+stack.show()
+
+
+# ===================== 7. Hash Table (Insert & Delete) =====================
+class HashTable:
+    def __init__(self, size=5):
+        self.size = size
+        self.tab = [[] for _ in range(size)]
+
+    def hash(self, k): return hash(k)%self.size
+
+    def insert(self, k, v):
+        i = self.hash(k)
+        for p in self.tab[i]:
+            if p[0] == k:
+                p[1] = v
+                return
+        self.tab[i].append([k,v])
+
+    def delete(self, k):
+        i = self.hash(k)
+        for j,p in enumerate(self.tab[i]):
+            if p[0] == k:
+                del self.tab[i][j]
+                return True
+        return False
+
+    def search(self, k):
+        i = self.hash(k)
+        for p in self.tab[i]:
+            if p[0] == k:
+                return p[1]
+        return None
+
+    def show(self):
+        print("\nHash Table:")
+        for i,b in enumerate(self.tab):
+            print(i, ":", b)
+
+ht = HashTable()
+ht.insert("apple", 10)
+ht.insert("banana", 20)
+ht.insert("cherry", 30)
+ht.show()
+ht.delete("banana")
+ht.show()
+
+
+# ===================== 8. Concurrent Hash Table =====================
+class ConHash:
+    def __init__(self, size=5):
+        self.size = size
+        self.tab = [[] for _ in range(size)]
+        self.locks = [threading.Lock() for _ in range(size)]
+
+    def hash(self, k): return hash(k)%self.size
+
+    def insert(self, k, v):
+        i = self.hash(k)
+        with self.locks[i]:
+            for p in self.tab[i]:
+                if p[0] == k:
+                    p[1] = v
+                    return
+            self.tab[i].append([k,v])
+
+    def show(self):
+        print("\nConcurrent Hash Table:")
+        for i,b in enumerate(self.tab):
+            print(i,":",b)
+
+cht = ConHash()
+t1 = threading.Thread(target=lambda:[cht.insert(k,v) for k,v in [("a",1),("b",2)]])
+t2 = threading.Thread(target=lambda:[cht.insert(k,v) for k,v in [("c",3),("d",4)]])
+t1.start(); t2.start(); t1.join(); t2.join()
+cht.show()
+
+
+# ===================== 9. Cuckoo Hashing =====================
+class CuckooHash:
+    def __init__(self, size=7, maxloop=20):
+        self.n = size
+        self.max = maxloop
+        self.t1 = [None]*size
+        self.t2 = [None]*size
+
+    def h1(self,k): return hash(k)%self.n
+    def h2(self,k): return (hash(k)//self.n)%self.n
+
+    def insert(self,k):
+        c, l = k, 0
+        while l < self.max:
+            i = self.h1(c)
+            if self.t1[i] is None:
+                self.t1[i] = c; return
+            c, self.t1[i] = self.t1[i], c
+
+            j = self.h2(c)
+            if self.t2[j] is None:
+                self.t2[j] = c; return
+            c, self.t2[j] = self.t2[j], c
+            l += 1
+
+    def show(self):
+        print("\nCuckoo Hashing:")
+        print("Table1:", self.t1)
+        print("Table2:", self.t2)
+
+ck = CuckooHash()
+for k in ["apple","banana","cherry","date","fig","grape"]:
+    ck.insert(k)
+ck.show()
