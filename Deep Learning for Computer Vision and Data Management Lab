@@ -1,0 +1,508 @@
+#Ex-1. Drawing Confusion Matrix and Computation of differet metrics for the multi-class classification Problem
+
+#code 1 
+
+
+from pycm import ConfusionMatrix
+
+# Standardized labels: Title Case for consistency
+confusion_matrix = {
+    "Red Disease": {"Red Disease": 92, "Aeromoniasis": 0, "Gill Disease": 3, "Saprolegniasis": 2, "Healthy Fish": 0, "Parasitic Disease": 0, "White Tail Disease": 3},
+    "Aeromoniasis": {"Red Disease": 0, "Aeromoniasis": 94, "Gill Disease": 3, "Saprolegniasis": 0, "Healthy Fish": 3, "Parasitic Disease": 0, "White Tail Disease": 0},
+    "Gill Disease": {"Red Disease": 2, "Aeromoniasis": 0, "Gill Disease": 95, "Saprolegniasis": 0, "Healthy Fish": 0, "Parasitic Disease": 1, "White Tail Disease": 2},
+    "Saprolegniasis": {"Red Disease": 5, "Aeromoniasis": 1, "Gill Disease": 0, "Saprolegniasis": 90, "Healthy Fish": 1, "Parasitic Disease": 3, "White Tail Disease": 0},
+    "Healthy Fish": {"Red Disease": 1, "Aeromoniasis": 0, "Gill Disease": 0, "Saprolegniasis": 0, "Healthy Fish": 99, "Parasitic Disease": 0, "White Tail Disease": 0},
+    "Parasitic Disease": {"Red Disease": 0, "Aeromoniasis": 3, "Gill Disease": 7, "Saprolegniasis": 1, "Healthy Fish": 4, "Parasitic Disease": 83, "White Tail Disease": 2},
+    "White Tail Disease": {"Red Disease": 4, "Aeromoniasis": 0, "Gill Disease": 3, "Saprolegniasis": 2, "Healthy Fish": 5, "Parasitic Disease": 1, "White Tail Disease": 85}
+}
+
+# Create confusion matrix object
+cm2 = ConfusionMatrix(matrix=confusion_matrix)
+
+# Display matrix
+print(cm2)
+
+
+#code 2
+import seaborn as sns
+import pandas as pd
+from pycm import ConfusionMatrix
+import matplotlib.pyplot as plt
+
+confusion_matrix = {
+    "Red Disease": {"Red Disease": 92, "Aeromoniasis": 0, "Gill Disease": 3, "Saprolegniasis": 2, "Healthy Fish": 0, "Parasitic Disease": 0, "White Tail Disease": 3},
+    "Aeromoniasis": {"Red Disease": 0, "Aeromoniasis": 94, "Gill Disease": 3, "Saprolegniasis": 0, "Healthy Fish": 3, "Parasitic Disease": 0, "White Tail Disease": 0},
+    "Gill Disease": {"Red Disease": 2, "Aeromoniasis": 0, "Gill Disease": 95, "Saprolegniasis": 0, "Healthy Fish": 0, "Parasitic Disease": 1, "White Tail Disease": 2},
+    "Saprolegniasis": {"Red Disease": 5, "Aeromoniasis": 1, "Gill Disease": 0, "Saprolegniasis": 90, "Healthy Fish": 1, "Parasitic Disease": 3, "White Tail Disease": 0},
+    "Healthy Fish": {"Red Disease": 1, "Aeromoniasis": 0, "Gill Disease": 0, "Saprolegniasis": 0, "Healthy Fish": 99, "Parasitic Disease": 0, "White Tail Disease": 0},
+    "Parasitic Disease": {"Red Disease": 0, "Aeromoniasis": 3, "Gill Disease": 7, "Saprolegniasis": 1, "Healthy Fish": 4, "Parasitic Disease": 83, "White Tail Disease": 2},
+    "White Tail Disease": {"Red Disease": 4, "Aeromoniasis": 0, "Gill Disease": 3, "Saprolegniasis": 2, "Healthy Fish": 5, "Parasitic Disease": 1, "White Tail Disease": 85}
+}
+
+
+df = pd.DataFrame(confusion_matrix).T  # Transpose for correct orientation
+plt.figure(figsize=(25, 25))
+sns.heatmap(df, annot=True, fmt="d", cmap="YlGnBu")
+plt.title("Confusion Matrix for MobileNetV2 based Classifier Model")
+plt.ylabel("Predicted Disease")
+plt.xlabel("Actual Disease")
+plt.show()
+
+
+
+#Ex-2. Different Data Augmentation Techniques for increasing the size of the dataset
+
+
+#code 1 
+
+from numpy import expand_dims
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot
+# load the image
+img = load_img('bird.jpg')
+# convert to numpy array
+data = img_to_array(img)
+# expand dimension to one sample
+samples = expand_dims(data, 0)
+# create image data augmentation generator
+datagen = ImageDataGenerator(width_shift_range=[-200,200])
+# prepare iterator
+it = datagen.flow(samples, batch_size=1)
+# generate samples and plot
+for i in range(9):
+	# define subplot
+	pyplot.subplot(330 + 1 + i)
+	# generate batch of images
+	batch = it.next()
+	# convert to unsigned integers for viewing
+	image = batch[0].astype('uint8')
+	# plot raw pixel data
+	pyplot.imshow(image)
+# show the figure
+pyplot.show()
+
+#code 2 
+
+from numpy import expand_dims
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot
+# load the image
+img = load_img('bird.jpg')
+# convert to numpy array
+data = img_to_array(img)
+# expand dimension to one sample
+samples = expand_dims(data, 0)
+# create image data augmentation generator
+datagen = ImageDataGenerator(height_shift_range=0.5)
+# prepare iterator
+it = datagen.flow(samples, batch_size=1)
+# generate samples and plot
+for i in range(9):
+	# define subplot
+	pyplot.subplot(330 + 1 + i)
+	# generate batch of images
+	batch = it.next()
+	# convert to unsigned integers for viewing
+	image = batch[0].astype('uint8')
+	# plot raw pixel data
+	pyplot.imshow(image)
+# show the figure
+pyplot.show()
+
+
+#code 3 
+
+from numpy import expand_dims
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot
+# load the image
+img = load_img('bird.jpg')
+# convert to numpy array
+data = img_to_array(img)
+# expand dimension to one sample
+samples = expand_dims(data, 0)
+# create image data augmentation generator
+datagen = ImageDataGenerator(horizontal_flip=True)
+# prepare iterator
+it = datagen.flow(samples, batch_size=1)
+# generate samples and plot
+for i in range(9):
+	# define subplot
+	pyplot.subplot(330 + 1 + i)
+	# generate batch of images
+	batch = it.next()
+	# convert to unsigned integers for viewing
+	image = batch[0].astype('uint8')
+	# plot raw pixel data
+	pyplot.imshow(image)
+# show the figure
+pyplot.show()
+
+
+#code 4
+ 
+# example of random rotation image augmentation
+from numpy import expand_dims
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot
+# load the image
+img = load_img('bird.jpg')
+# convert to numpy array
+data = img_to_array(img)
+# expand dimension to one sample
+samples = expand_dims(data, 0)
+# create image data augmentation generator
+datagen = ImageDataGenerator(rotation_range=90)
+# prepare iterator
+it = datagen.flow(samples, batch_size=1)
+# generate samples and plot
+for i in range(9):
+	# define subplot
+	pyplot.subplot(330 + 1 + i)
+	# generate batch of images
+	batch = it.next()
+	# convert to unsigned integers for viewing
+	image = batch[0].astype('uint8')
+	# plot raw pixel data
+	pyplot.imshow(image)
+# show the figure
+pyplot.show()
+
+#code 5
+
+# example of brighting image augmentation
+from numpy import expand_dims
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot
+# load the image
+img = load_img('bird.jpg')
+# convert to numpy array
+data = img_to_array(img)
+# expand dimension to one sample
+samples = expand_dims(data, 0)
+# create image data augmentation generator
+datagen = ImageDataGenerator(brightness_range=[0.2,1.0])
+# prepare iterator
+it = datagen.flow(samples, batch_size=1)
+# generate samples and plot
+for i in range(9):
+	# define subplot
+	pyplot.subplot(330 + 1 + i)
+	# generate batch of images
+	batch = it.next()
+	# convert to unsigned integers for viewing
+	image = batch[0].astype('uint8')
+	# plot raw pixel data
+	pyplot.imshow(image)
+# show the figure
+pyplot.show()
+
+#code 6 
+from numpy import expand_dims
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.preprocessing.image import ImageDataGenerator
+from matplotlib import pyplot
+# load the image
+img = load_img('bird.jpg')
+# convert to numpy array
+data = img_to_array(img)
+# expand dimension to one sample
+samples = expand_dims(data, 0)
+# create image data augmentation generator
+datagen = ImageDataGenerator(zoom_range=[0.5,1.0])
+# prepare iterator
+it = datagen.flow(samples, batch_size=1)
+# generate samples and plot
+for i in range(9):
+	# define subplot
+	pyplot.subplot(330 + 1 + i)
+	# generate batch of images
+	batch = it.next()
+	# convert to unsigned integers for viewing
+	image = batch[0].astype('uint8')
+	# plot raw pixel data
+	pyplot.imshow(image)
+# show the figure
+pyplot.show()
+
+
+#Ex-3. Visualization of Layers using Feature Maps
+
+
+#code 1 
+from keras.applications.vgg16 import VGG16
+from matplotlib import pyplot
+from keras.utils.vis_utils import plot_model
+# load the model
+model = VGG16()
+plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+# summarize filter shapes
+print(model.layers)
+for layer in model.layers:
+	# check for convolutional layer
+	if 'conv' not in layer.name:
+		continue
+	# get filter weights
+	filters, biases = layer.get_weights()
+	print(layer.name, filters.shape)
+
+#code 2 
+
+from keras.applications.vgg16 import VGG16
+from matplotlib import pyplot
+from keras.utils.vis_utils import plot_model
+# load the model
+model = VGG16()
+plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+# retrieve weights from the second hidden layer
+filters, biases = model.layers[1].get_weights()
+# normalize filter values to 0-1 so we can visualize them
+f_min, f_max = filters.min(), filters.max()
+filters = (filters - f_min) / (f_max - f_min)
+# plot first few filters
+n_filters, ix = 6, 1
+for i in range(n_filters):
+	# get the filter
+	f = filters[:, :, :, i]
+	# plot each channel separately
+	for j in range(3):
+		# specify subplot and turn of axis
+		ax = pyplot.subplot(n_filters, 3, ix)
+		ax.set_xticks([])
+		ax.set_yticks([])
+		# plot filter channel in grayscale
+		pyplot.imshow(f[:, :, j], cmap='gray')
+		ix += 1
+# show the figure
+pyplot.show()
+
+#code 3 
+from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.models import Model
+from matplotlib import pyplot
+from numpy import expand_dims
+from keras.utils.vis_utils import plot_model
+# load the model
+model = VGG16()
+# redefine model to output right after the first hidden layer
+model = Model(inputs=model.inputs, outputs=model.layers[1].output)
+plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+model.summary()
+
+# load the image with the required shape
+img = load_img('bird.jpg', target_size=(224, 224))
+# convert the image to an array
+img = img_to_array(img)
+# expand dimensions so that it represents a single 'sample'
+img = expand_dims(img, axis=0)
+# prepare the image (e.g. scale pixel values for the vgg)
+img = preprocess_input(img)
+# get feature map for first hidden layer
+feature_maps = model.predict(img)
+# plot all 64 maps in an 8x8 squares
+square = 8
+ix = 1
+for _ in range(square):
+	for _ in range(square):
+		# specify subplot and turn of axis
+		ax = pyplot.subplot(square, square, ix)
+		ax.set_xticks([])
+		ax.set_yticks([])
+		# plot filter channel in grayscale
+		pyplot.imshow(feature_maps[0, :, :, ix-1], cmap='gray')
+		ix += 1
+# show the figure
+pyplot.show()
+
+#code 4
+
+from keras.applications.vgg16 import VGG16
+from keras.applications.vgg16 import preprocess_input
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.models import Model
+from matplotlib import pyplot
+from numpy import expand_dims
+from keras.utils.vis_utils import plot_model
+# load the model
+model = VGG16()
+plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+# redefine model to output right after the first hidden layer
+ixs = [2, 5, 9, 13, 17]
+outputs = [model.layers[i].output for i in ixs]
+model = Model(inputs=model.inputs, outputs=outputs)
+# load the image with the required shape
+img = load_img('D:/OCT/bird.jpg', target_size=(224, 224))
+# convert the image to an array
+img = img_to_array(img)
+# expand dimensions so that it represents a single 'sample'
+img = expand_dims(img, axis=0)
+# prepare the image (e.g. scale pixel values for the vgg)
+img = preprocess_input(img)
+# get feature map for first hidden layer
+feature_maps = model.predict(img)
+# plot the output from each block
+square = 8
+for fmap in feature_maps:
+	# plot all 64 maps in an 8x8 squares
+	ix = 1
+	for _ in range(square):
+		for _ in range(square):
+			# specify subplot and turn of axis
+			ax = pyplot.subplot(square, square, ix)
+			ax.set_xticks([])
+			ax.set_yticks([])
+			# plot filter channel in grayscale
+			pyplot.imshow(fmap[0, :, :, ix-1], cmap='gray')
+			ix += 1
+	# show the figure
+	pyplot.show()
+
+#code 5 
+
+from keras.models import Sequential
+from keras.layers import Dense
+from keras.utils.vis_utils import plot_model
+model = Sequential()
+model.add(Dense(2, input_dim=1, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+plot_model(model, to_file='model_plot.png', show_shapes=True, show_layer_names=True)
+
+
+#Ex-4 Classification of Objects Using Different Pre-trained CNN Models trained on ImageNet Dataset
+
+#code 1 
+
+# import the necessary packages
+from tensorflow.keras.applications import ResNet50
+from tensorflow.keras.applications import InceptionV3
+from tensorflow.keras.applications import Xception # TensorFlow ONLY
+from tensorflow.keras.applications import VGG16
+from tensorflow.keras.applications import VGG19
+from tensorflow.keras.applications import imagenet_utils
+from tensorflow.keras.applications.inception_v3 import preprocess_input
+from tensorflow.keras.preprocessing.image import img_to_array
+from tensorflow.keras.preprocessing.image import load_img
+import numpy as np
+import argparse
+import cv2
+
+# construct the argument parse and parse the arguments
+ap = argparse.ArgumentParser()
+ap.add_argument("-i", "--image", required=True,
+	help="path to the input image")
+ap.add_argument("-model", "--model", type=str, default="vgg16",
+	help="name of pre-trained network to use")
+args = vars(ap.parse_args())
+
+# To run the file from the command prompt "python classify_image.py --image images/soccer_ball.jpg --model vgg16"
+# define a dictionary that maps model names to their classes
+# inside Keras
+MODELS = {
+	"vgg16": VGG16,
+	"vgg19": VGG19,
+	"inception": InceptionV3,
+	"xception": Xception, # TensorFlow ONLY
+	"resnet": ResNet50
+}
+# esnure a valid model name was supplied via command line argument
+if args["model"] not in MODELS.keys():
+	raise AssertionError("The --model command line argument should "
+		"be a key in the `MODELS` dictionary")
+
+# initialize the input image shape (224x224 pixels) along with
+# the pre-processing function (this might need to be changed
+# based on which model we use to classify our image)
+inputShape = (224, 224)
+preprocess = imagenet_utils.preprocess_input
+# if we are using the InceptionV3 or Xception networks, then we
+# need to set the input shape to (299x299) [rather than (224x224)]
+# and use a different image pre-processing function
+if args["model"] in ("inception", "xception"):
+	inputShape = (299, 299)
+	preprocess = preprocess_input
+
+# load our the network weights from disk (NOTE: if this is the
+# first time you are running this script for a given network, the
+# weights will need to be downloaded first -- depending on which
+# network you are using, the weights can be 90-575MB, so be
+# patient; the weights will be cached and subsequent runs of this
+# script will be *much* faster)
+print("[INFO] loading {}...".format(args["model"]))
+Network = MODELS[args["model"]]
+model = Network(weights="imagenet")
+
+
+# load the input image using the Keras helper utility while ensuring
+# the image is resized to `inputShape`, the required input dimensions
+# for the ImageNet pre-trained network
+print("[INFO] loading and pre-processing image...")
+image = load_img(args["image"], target_size=inputShape)
+image = img_to_array(image)
+# our input image is now represented as a NumPy array of shape
+# (inputShape[0], inputShape[1], 3) however we need to expand the
+# dimension by making the shape (1, inputShape[0], inputShape[1], 3)
+# so we can pass it through the network
+image = np.expand_dims(image, axis=0)
+# pre-process the image using the appropriate function based on the
+# model that has been loaded (i.e., mean subtraction, scaling, etc.)
+image = preprocess(image)
+
+# classify the image
+print("[INFO] classifying image with '{}'...".format(args["model"]))
+preds = model.predict(image)
+P = imagenet_utils.decode_predictions(preds)
+# loop over the predictions and display the rank-5 predictions +
+# probabilities to our terminal
+for (i, (imagenetID, label, prob)) in enumerate(P[0]):
+	print("{}. {}: {:.2f}%".format(i + 1, label, prob * 100))
+
+# load the image via OpenCV, draw the top prediction on the image,
+# and display the image to our screen
+orig = cv2.imread(args["image"])
+(imagenetID, label, prob) = P[0][0]
+cv2.putText(orig, "Label: {}, {:.2f}%".format(label, prob * 100),
+	(10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.8, (0, 0, 255), 2)
+cv2.imshow("Classification", orig)
+cv2.waitKey(0)
+
+#code 2 
+
+
+from keras.preprocessing.image import load_img
+from keras.preprocessing.image import img_to_array
+from keras.applications.vgg16 import preprocess_input
+from keras.applications.vgg16 import decode_predictions
+from keras.applications.vgg16 import VGG16
+# load the model
+model = VGG16()
+# load an image from file
+image = load_img('mug.jpg', target_size=(224, 224))
+# convert the image pixels to a numpy array
+image = img_to_array(image)
+# reshape data for the model
+image = image.reshape((1, image.shape[0], image.shape[1], image.shape[2]))
+# prepare the image for the VGG model
+image = preprocess_input(image)
+# predict the probability across all output classes
+yhat = model.predict(image)
+# convert the probabilities to class labels
+label = decode_predictions(yhat)
+# retrieve the most likely result, e.g. highest probability
+label = label[0][0]
+# print the classification
+print('%s (%.2f%%)' % (label[1], label[2]*100))
