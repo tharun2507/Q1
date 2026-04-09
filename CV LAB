@@ -1163,3 +1163,186 @@ STEP 7: CAPTION GENERATION
 
 RESULT: 
 The model successfully extracted features using DenseNet201 and generated captions using LSTM. It  produced meaningful descriptions for fish disease images, demonstrating effective image  understanding and caption generation.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+EXPERIMENT: STUDENT DATABASE USING MYSQL
+
+AIM
+To create a student database in MySQL and perform various operations such as CREATE, INSERT, SELECT, UPDATE, DELETE, GROUP BY, and JOIN.
+
+ALGORITHM
+Install and open MySQL Workbench.
+
+Create a new database using CREATE DATABASE.
+
+Select the database using USE.
+
+Create a table students with required fields.
+
+Insert records into the table using INSERT.
+
+Retrieve data using SELECT.
+
+Apply conditions using WHERE.
+
+Update records using UPDATE.
+
+Delete records using DELETE.
+
+Sort records using ORDER BY.
+
+Perform aggregate functions like AVG, MAX, MIN.
+
+Group records using GROUP BY.
+
+Create related tables and apply JOIN.
+
+Display final output.
+
+PROGRAM (SQL COMMANDS)
+🔹 Create Database
+CREATE DATABASE student_db;
+USE student_db;
+🔹 Create Table
+CREATE TABLE students (
+    student_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(50),
+    age INT,
+    gender VARCHAR(10),
+    department VARCHAR(50),
+    marks INT
+);
+🔹 Insert Data
+INSERT INTO students (name, age, gender, department, marks) VALUES
+('Arun', 21, 'Male', 'CSE', 85),
+('Priya', 22, 'Female', 'IT', 90),
+('Rahul', 20, 'Male', 'ECE', 75),
+('Divya', 21, 'Female', 'CSE', 88),
+('Karthik', 23, 'Male', 'IT', 92);
+🔹 Select All Records
+SELECT * FROM students;
+🔹 WHERE Condition
+SELECT * FROM students WHERE marks > 80;
+🔹 Update Record
+UPDATE students
+SET marks = 95
+WHERE name = 'Arun';
+🔹 Delete Record
+DELETE FROM students
+WHERE student_id = 3;
+🔹 Order By
+SELECT * FROM students ORDER BY marks DESC;
+🔹 Aggregate Functions
+SELECT AVG(marks) AS average_marks FROM students;
+SELECT MAX(marks) FROM students;
+SELECT MIN(marks) FROM students;
+SELECT COUNT(*) FROM students;
+🔹 Group By
+SELECT department, AVG(marks)
+FROM students
+GROUP BY department;
+🔹 Create Courses Table
+CREATE TABLE courses (
+    course_id INT PRIMARY KEY,
+    course_name VARCHAR(50)
+);
+🔹 Insert into Courses
+INSERT INTO courses VALUES
+(1, 'DBMS'),
+(2, 'AI'),
+(3, 'ML');
+🔹 Create Enrollment Table
+CREATE TABLE enrollments (
+    enroll_id INT PRIMARY KEY AUTO_INCREMENT,
+    student_id INT,
+    course_id INT,
+    FOREIGN KEY (student_id) REFERENCES students(student_id),
+    FOREIGN KEY (course_id) REFERENCES courses(course_id)
+);
+🔹 Insert into Enrollments
+INSERT INTO enrollments (student_id, course_id) VALUES
+(1,1),
+(2,2),
+(4,3);
+🔹 JOIN Operation
+SELECT students.name, courses.course_name
+FROM enrollments
+JOIN students ON enrollments.student_id = students.student_id
+JOIN courses ON enrollments.course_id = courses.course_id;
+OUTPUT
+🔹 Students Table
+student_id	name	age	gender	department	marks
+1	Arun	21	Male	CSE	95
+2	Priya	22	Female	IT	90
+4	Divya	21	Female	CSE	88
+5	Karthik	23	Male	IT	92
+🔹 Condition Output (marks > 80)
+name	marks
+Arun	95
+Priya	90
+Divya	88
+Karthik	92
+🔹 GROUP BY Output
+department	avg_marks
+CSE	91.5
+IT	91
+🔹 JOIN Output
+name	course_name
+Arun	DBMS
+Priya	AI
+Divya	ML
+RESULT
+Thus, a student database was successfully created in MySQL and various operations like CRUD, GROUP BY, and JOIN were performed successfully.
+
+ EXTRA (for Viva)
+If they ask:
+
+DDL commands → CREATE, ALTER, DROP
+
+DML commands → INSERT, UPDATE, DELETE
+
+DQL command → SELECT
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
